@@ -133,7 +133,9 @@ export const inputClass =
 /** Data table shell: horizontal scroll on narrow screens. */
 export function Table({ children }: { children: ReactNode }) {
   return (
-    <div className="overflow-x-auto">
+    // `relative` so absolutely positioned children (e.g. sr-only labels) are clipped
+    // by this scroller instead of widening the whole page on mobile.
+    <div className="relative overflow-x-auto">
       <table className="w-full border-collapse text-left text-[13px]">{children}</table>
     </div>
   );
