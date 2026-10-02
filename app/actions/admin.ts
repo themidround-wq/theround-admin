@@ -3,6 +3,7 @@
 import { refresh } from "next/cache";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { ApiError, adminFetch } from "@/lib/api";
+import QRCode from "qrcode";
 import type { ActionResult, CatalogCategory } from "@/lib/types";
 
 /**
@@ -257,12 +258,14 @@ export async function createTeamMember(_: ActionResult, f: FormData) {
 }
 
 export async function updateTeamMember(_: ActionResult, f: FormData) {
-  const body: { role?: string; active?: boolean; password?: string } = {};
+  const body: { role?: string; active?: boolean; password?: string; resetTwoFactor?: boolean } = {};
+  if (f.has("resetTwoFactor")) body.resetTwoFactor = true;
   if (f.has("role")) body.role = s(f, "role");
   if (f.has("active")) body.active = s(f, "active") === "true";
   if (f.has("password")) body.password = String(f.get("password") ?? "");
   return run(async () => {
     await adminFetch(`/team/${s(f, "id")}`, { method: "PATCH", body });
+    if (body.resetTwoFactor) return "Two-factor turned off for them. They can set it up again after signing in.";
     if (body.password) return "Password reset. They've been signed out everywhere.";
     if (body.active !== undefined) return body.active ? "Access restored." : "Access removed. They've been signed out.";
     return "Role updated.";
@@ -274,4 +277,59 @@ export async function deleteTeamMember(_: ActionResult, f: FormData) {
     await adminFetch(`/team/${s(f, "id")}`, { method: "DELETE" });
     return "Removed from the team.";
   });
+}
+
+// ---- two-factor ----------------------------------------------------------------
+
+type CodesResult = { ok: true; recoveryCodes: string[] } | { ok: false; message: string };
+
+const asError = (e: unknown): { ok: false; message: string } => {
+  unstable_rethrow(e);
+  if (e instanceof ApiError) return { ok: false, message: e.message };
+  console.error("2fa action failed", e);
+  return { ok: false, message: "Couldn't reach the round API. Try again." };
+};
+
+/** New secret plus a QR code (SVG, rendered here so the secret never hits a third party). */
+export async function startTwoFactorSetup(): Promise<{ ok: true; secret: string; qrSvg: string } | { ok: false; message: string }> {
+  try {
+    const r = await adminFetch<{ secret: string; otpauthUri: string }>("/auth/2fa/setup", { method: "POST" });
+    const qrSvg = await QRCode.toString(r.otpauthUri, { type: "svg", margin: 1, errorCorrectionLevel: "M", color: { dark: "#14271a", light: "#ffffff" } });
+    return { ok: true, secret: r.secret, qrSvg };
+  } catch (e) {
+    return asError(e);
+  }
+}
+
+export async function confirmTwoFactor(code: string): Promise<CodesResult> {
+  try {
+    const r = await adminFetch<{ recoveryCodes: string[] }>("/auth/2fa/enable", { method: "POST", body: { code } });
+    return { ok: true, recoveryCodes: r.recoveryCodes };
+  } catch (e) {
+    return asError(e);
+  }
+}
+
+export async function newRecoveryCodes(code: string): Promise<CodesResult> {
+  try {
+    const r = await adminFetch<{ recoveryCodes: string[] }>("/auth/2fa/recovery-codes", { method: "POST", body: { code } });
+    return { ok: true, recoveryCodes: r.recoveryCodes };
+  } catch (e) {
+    return asError(e);
+  }
+}
+
+export async function disableTwoFactor(_: ActionResult, f: FormData) {
+  return run(async () => {
+    await adminFetch("/auth/2fa/disable", {
+      method: "POST",
+      body: { password: String(f.get("password") ?? ""), code: s(f, "code") },
+    });
+    return "Two-factor is off. Your account is protected by your password only.";
+  });
+}
+
+/** Re-renders the page after setup finishes (the codes dialog is closed). */
+export async function refreshPage() {
+  refresh();
 }

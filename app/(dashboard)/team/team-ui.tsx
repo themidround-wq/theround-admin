@@ -96,6 +96,7 @@ export function TeamTable({ team, meId, owner }: { team: Admin[]; meId: string; 
             <th className={th}>Person</th>
             <th className={th}>Role</th>
             <th className={th}>Status</th>
+            <th className={th}>2FA</th>
             <th className={th}>Last sign-in</th>
             <th className={th}>Added</th>
             {owner && <th className={th} />}
@@ -135,6 +136,7 @@ export function TeamTable({ team, meId, owner }: { team: Admin[]; meId: string; 
                   )}
                 </td>
                 <td className={td}>{a.active ? <Badge tone="green">Active</Badge> : <Badge tone="danger">No access</Badge>}</td>
+                <td className={td}>{a.twoFactorEnabled ? <Badge tone="green">On</Badge> : <Badge tone="warn">Off</Badge>}</td>
                 <td className={`${td} whitespace-nowrap text-muted`}>{fmtAgo(a.lastLoginAt)}</td>
                 <td className={`${td} whitespace-nowrap text-muted`}>{fmtDate(a.createdAt)}</td>
                 {owner && (
@@ -151,6 +153,15 @@ export function TeamTable({ team, meId, owner }: { team: Admin[]; meId: string; 
                         >
                           Reset password
                         </Button>
+                        {a.twoFactorEnabled && (
+                          <ActionForm action={updateTeamMember}>
+                            <input type="hidden" name="id" value={a.id} />
+                            <input type="hidden" name="resetTwoFactor" value="true" />
+                            <ConfirmSubmit variant="ghost" prompt="Lost their phone? This turns off their 2FA." confirmLabel="Reset 2FA">
+                              Reset 2FA
+                            </ConfirmSubmit>
+                          </ActionForm>
+                        )}
                         <ActionForm action={updateTeamMember}>
                           <input type="hidden" name="id" value={a.id} />
                           <input type="hidden" name="active" value={String(!a.active)} />

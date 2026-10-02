@@ -10,6 +10,7 @@ export type Admin = {
   active: boolean;
   lastLoginAt: string | null;
   createdAt: string;
+  twoFactorEnabled: boolean;
 };
 
 export type Paged<T> = {

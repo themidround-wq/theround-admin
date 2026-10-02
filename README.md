@@ -33,6 +33,8 @@ Sign in with the owner account the service creates on first boot from `ADMIN_EMA
 - `POST /api/admin/auth/login` returns a 12-hour token tied to a session row. It's stored in an httpOnly `tr_admin` cookie and only ever sent server-to-server, so the browser never sees the API.
 - `proxy.ts` sends anyone without the cookie to `/login`. The API checks the token on every call; a 401 (expired, signed out elsewhere, access removed) sends the admin back to `/login`.
 - Sign out revokes the session on the API, then clears the cookie.
+- **Two-factor:** turn it on under Settings → Two-factor authentication (QR code for Google Authenticator or any TOTP app, then 10 recovery codes to save). After that, sign-in asks for a 6-digit code after the password; "Lost your phone?" accepts a recovery code. Everyone without 2FA sees a reminder banner.
+- **Forgot password:** the link under the password field emails a single-use reset link (30 minutes). `/forgot-password` and `/reset-password` are the only pages besides `/login` reachable without a session.
 
 ## Layout
 

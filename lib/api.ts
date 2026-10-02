@@ -88,7 +88,9 @@ export async function loginRequest(email: string, password: string) {
     signal: AbortSignal.timeout(15_000),
   });
   if (!res.ok) throw new ApiError(res.status, await messageOf(res));
-  return (await res.json()) as { accessToken: string; expiresAt: string; admin: Admin };
+  return (await res.json()) as
+    | { twoFactorRequired: true; challengeToken: string }
+    | { twoFactorRequired: false; accessToken: string; expiresAt: string; admin: Admin };
 }
 
 /** The signed-in admin, fetched once per request. */

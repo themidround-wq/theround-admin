@@ -3,6 +3,7 @@ import { Card, CardHeader, PageHeader } from "@/components/ui";
 import { adminFetch, canEdit, currentAdmin } from "@/lib/api";
 import type { Session, Setting } from "@/lib/types";
 import { PasswordForm, ProfileForm, SessionsList, SettingRow } from "./settings-ui";
+import { TwoFactorCard, type TwoFactorStatus } from "./two-factor";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -13,10 +14,11 @@ const GROUPS = [
 ];
 
 export default async function SettingsPage() {
-  const [settings, sessions, admin] = await Promise.all([
+  const [settings, sessions, admin, twoFactor] = await Promise.all([
     adminFetch<Setting[]>("/settings"),
     adminFetch<Session[]>("/auth/sessions"),
     currentAdmin(),
+    adminFetch<TwoFactorStatus>("/auth/2fa"),
   ]);
   const editable = canEdit(admin);
 
@@ -45,6 +47,10 @@ export default async function SettingsPage() {
           <Card>
             <CardHeader title="Your profile" description={`${admin.email} · ${admin.role}`} />
             <ProfileForm name={admin.name} />
+          </Card>
+          <Card id="two-factor">
+            <CardHeader title="Two-factor authentication" description="A code from your phone on every sign-in." />
+            <TwoFactorCard status={twoFactor} email={admin.email} />
           </Card>
           <Card>
             <CardHeader title="Password" description="Changing it signs out your other sessions." />
