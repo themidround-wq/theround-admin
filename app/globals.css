@@ -1,26 +1,133 @@
 @import "tailwindcss";
 
+/* Brand tokens from the landing page (theround/app/globals.css). */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --night: #0d1710;
+  --cream: #f1f0df;
+  --lime: #caff79;
+  --ink: #14271a;
+  --moss: #5e9d3d;
+  --slate: #5b6358;
+
+  /* Dashboard surfaces: the sidebar stays on the landing page's night green;
+     content sits on a pale cream so tables and numbers read easily. */
+  --canvas: #f4f4ea;
+  --card: #ffffff;
+  --line: #e2e3d6;
+  --line-soft: #eeeee4;
+  --muted: #6b7266;
+  --danger: #b4321f;
+  --danger-soft: #fbe9e5;
+  --warn: #8a5a00;
+  --warn-soft: #fbf1d9;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-night: var(--night);
+  --color-cream: var(--cream);
+  --color-lime: var(--lime);
+  --color-ink: var(--ink);
+  --color-moss: var(--moss);
+  --color-slate: var(--slate);
+  --color-canvas: var(--canvas);
+  --color-card: var(--card);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-muted: var(--muted);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --font-sans: var(--font-satoshi);
+  --font-serif-italic: Georgia, "Times New Roman", serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+/* Tabular figures keep numbers aligned in KPIs and tables. */
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The landing page's cut-corner CTA, reused for primary actions. */
+.cut-corner {
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+}
+
+@keyframes toast-in {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-toast {
+  animation: toast-in 160ms ease-out;
+}
+
+/* Newsletter editor content: close to how the email renders. */
+.email-prose {
+  font-size: 16px;
+  line-height: 1.6;
+}
+.email-prose > * + * {
+  margin-top: 0.85em;
+}
+.email-prose h2 {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-top: 1.4em;
+}
+.email-prose h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 1.2em;
+}
+.email-prose ul {
+  list-style: disc;
+  padding-left: 1.5em;
+}
+.email-prose ol {
+  list-style: decimal;
+  padding-left: 1.5em;
+}
+.email-prose li + li {
+  margin-top: 0.35em;
+}
+.email-prose blockquote {
+  border-left: 3px solid var(--line);
+  padding-left: 1em;
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+}
+.email-prose a {
+  text-decoration: underline;
+}
+.email-prose hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 1.5em 0;
+}
+.email-prose img {
+  max-width: 100%;
+  border-radius: 12px;
+}
+.email-prose img.ProseMirror-selectednode {
+  outline: 2px solid var(--moss);
+}
+.email-prose p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--muted);
+  opacity: 0.7;
+  float: left;
+  height: 0;
+  pointer-events: none;
 }

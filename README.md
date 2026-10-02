@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# the round — Admin
 
-## Getting Started
+Founder dashboard for the round. Next.js 16 (App Router) on top of the `/api/admin` endpoints in `theround-service`. It replaces the single-file mockup in `../the-round-admin-dashboard`.
 
-First, run the development server:
+## Pages
+
+| Page | What you can do |
+| --- | --- |
+| **Overview** | Waitlist, accounts, saved rounds and weekly actives with week-over-week change; daily chart (7/14/30/90 days); waitlist → practice funnel; latest signups. |
+| **Waitlist** | Search, filter (not invited / invited / has account), bulk-send the launch invite email, add emails by hand, remove, export CSV. |
+| **Users** | Search and filter by status and stage. Each user has a profile, stats and every round; suspend/restore or delete (removes their recordings too). |
+| **Practice** | Spin → save funnel, saved rounds per day, category mix, reflections; every round with filters, play recording, delete. |
+| **Newsletters** | Write newsletters, feature updates, announcements and maintenance notices in a WYSIWYG editor with live email preview and autosave. Pick an audience (users, segments, waitlist), send a test, schedule or send now, then follow delivery per recipient and retry failures. Manage unsubscribes. |
+| **Clinical content** | Wheel categories (reorder, rename, hide, delete), topics and questions (add, edit, delete). Anything already practised can't be deleted, only edited or hidden. |
+| **Team** | Owners add people, set roles (viewer / admin / owner), reset passwords, remove access. |
+| **Audit log** | Every change, sign-in and recording played, filterable by area. |
+| **Settings** | Waitlist open/closed, new sign-ups on/off, default response time, automatic emails on/off; your name, password and active sessions. |
+
+Brand (colours, Satoshi, logo, cut-corner button) comes from the landing page in `../theround`.
+
+## Run
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local   # point THEROUND_API_URL at theround-service, including /api
+npm install
+npm run dev                  # http://localhost:3001 (the service uses 3000)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Sign in with the owner account the service creates on first boot from `ADMIN_EMAIL` / `ADMIN_PASSWORD` (see the service README). Add everyone else from **Team**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How auth works
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `POST /api/admin/auth/login` returns a 12-hour token tied to a session row. It's stored in an httpOnly `tr_admin` cookie and only ever sent server-to-server, so the browser never sees the API.
+- `proxy.ts` sends anyone without the cookie to `/login`. The API checks the token on every call; a 401 (expired, signed out elsewhere, access removed) sends the admin back to `/login`.
+- Sign out revokes the session on the API, then clears the cookie.
 
-## Learn More
+## Layout
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+app/
+  login/            sign-in page
+  (dashboard)/      every signed-in page, sharing the sidebar layout
+  actions/          server actions: auth.ts (login/logout), admin.ts (all mutations)
+components/         UI kit, charts, sidebar, dialogs, toasts
+lib/api.ts          adminFetch(): authenticated calls to /api/admin
+lib/types.ts        API response shapes
+```
