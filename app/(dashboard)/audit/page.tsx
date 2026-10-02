@@ -36,6 +36,7 @@ const VERB: Record<string, string> = {
   "user.suspend": "Suspended a user",
   "user.unsuspend": "Restored a user",
   "user.delete": "Deleted a user",
+  "user.2fa_reset": "Reset a user's two-factor",
   "round.listen": "Played a recording",
   "round.delete": "Deleted a round",
   "catalog.category_create": "Added a category",

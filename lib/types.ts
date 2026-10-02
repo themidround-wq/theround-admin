@@ -47,6 +47,7 @@ export type AppUser = {
   defaultResponseSeconds: number;
   soundCues: boolean;
   onboarded: boolean;
+  twoFactorEnabled: boolean;
   suspendedAt: string | null;
   createdAt: string;
   updatedAt: string;

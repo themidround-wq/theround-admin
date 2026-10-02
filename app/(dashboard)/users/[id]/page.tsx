@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { deleteUser, setUserSuspended } from "@/app/actions/admin";
+import { deleteUser, resetUserTwoFactor, setUserSuspended } from "@/app/actions/admin";
 import { ActionForm, ConfirmSubmit } from "@/components/action-form";
 import { ChevronIcon } from "@/components/icons";
 import { SubmitButton } from "@/components/submit-button";
@@ -34,6 +34,7 @@ export default async function UserPage({ params }: PageProps<"/users/[id]">) {
     ["Goal", user.goal ? GOAL_LABEL[user.goal] : "—"],
     ["Default response", user.defaultResponseSeconds >= 240 ? "4:00 Case" : "1:30 Quick"],
     ["Sound cues", user.soundCues ? "On" : "Off"],
+    ["Two-factor", user.twoFactorEnabled ? "On" : "Off"],
     ["Waitlist ticket", waitlist ? `#${waitlist.ticketNumber} · ${fmtDate(waitlist.joinedAt)}` : "Not on the waitlist"],
     ["Account created", fmtDateTime(user.createdAt)],
   ];
@@ -70,6 +71,14 @@ export default async function UserPage({ params }: PageProps<"/users/[id]">) {
                 {user.suspendedAt ? "Restore access" : "Suspend"}
               </SubmitButton>
             </ActionForm>
+            {user.twoFactorEnabled && (
+              <ActionForm action={resetUserTwoFactor}>
+                <input type="hidden" name="id" value={user.id} />
+                <ConfirmSubmit size="md" variant="secondary" prompt="Lost their phone? This turns off their 2FA." confirmLabel="Reset 2FA">
+                  Reset 2FA
+                </ConfirmSubmit>
+              </ActionForm>
+            )}
             <ActionForm action={deleteUser}>
               <input type="hidden" name="id" value={user.id} />
               <ConfirmSubmit size="md" prompt="Delete account, rounds and recordings?" confirmLabel="Delete forever">

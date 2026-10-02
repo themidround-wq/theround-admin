@@ -78,6 +78,13 @@ export async function setUserSuspended(_: ActionResult, f: FormData) {
   });
 }
 
+export async function resetUserTwoFactor(_: ActionResult, f: FormData) {
+  return run(async () => {
+    await adminFetch(`/users/${s(f, "id")}/reset-2fa`, { method: "POST" });
+    return "Two-factor turned off. They can sign in with Google alone and set it up again.";
+  });
+}
+
 export async function deleteUser(_: ActionResult, f: FormData) {
   const r = await run(async () => {
     await adminFetch(`/users/${s(f, "id")}`, { method: "DELETE" });
