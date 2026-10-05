@@ -11,8 +11,11 @@ import {
   type ComponentProps,
   type ReactNode,
 } from "react";
+import { useFormStatus } from "react-dom";
 import type { ActionResult } from "@/lib/types";
+import { Dialog } from "./dialog";
 import { CheckIcon, CloseIcon } from "./icons";
+import { SubmitButton } from "./submit-button";
 import { Button, cx } from "./ui";
 
 // ---- toasts ------------------------------------------------------------------
@@ -96,43 +99,102 @@ export function ActionForm({
 export { SubmitButton } from "./submit-button";
 
 /**
- * Two-step destructive submit: the first click asks, the second does it.
- * Avoids browser confirm() dialogs.
+ * Destructive / critical submit with a confirmation modal dialog.
+ * Avoids native browser confirm() dialogs and prevents accidental destructive actions.
  */
 export function ConfirmSubmit({
   children,
   confirmLabel = "Yes, do it",
-  prompt = "Are you sure?",
+  pendingLabel,
+  prompt = "Are you sure? This action cannot be undone.",
   variant = "danger-ghost",
   size = "sm",
   className,
   title,
+  dialogTitle,
 }: {
   children: ReactNode;
   confirmLabel?: string;
+  pendingLabel?: string;
   prompt?: string;
   variant?: ComponentProps<typeof Button>["variant"];
   size?: "sm" | "md";
   className?: string;
   title?: string;
+  dialogTitle?: string;
 }) {
   const [asking, setAsking] = useState(false);
-  if (!asking) {
-    return (
-      <Button type="button" variant={variant} size={size} className={className} title={title} onClick={() => setAsking(true)}>
+  const { pending } = useFormStatus();
+  const wasPending = useRef(false);
+
+  useEffect(() => {
+    if (wasPending.current && !pending) {
+      setAsking(false);
+    }
+    wasPending.current = pending;
+  }, [pending]);
+
+  const isDestructive =
+    variant?.includes("danger") ||
+    confirmLabel.toLowerCase().includes("delete") ||
+    confirmLabel.toLowerCase().includes("remove") ||
+    confirmLabel.toLowerCase().includes("stop");
+
+  const modalTitle =
+    dialogTitle ||
+    title ||
+    (isDestructive
+      ? confirmLabel.toLowerCase().includes("delete")
+        ? "Confirm Deletion"
+        : confirmLabel.toLowerCase().includes("remove")
+        ? "Confirm Removal"
+        : "Confirm Action"
+      : "Confirm Action");
+
+  const submitVariant = isDestructive ? "danger" : "primary";
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant={variant}
+        size={size}
+        className={className}
+        title={title}
+        onClick={() => setAsking(true)}
+      >
         {children}
       </Button>
-    );
-  }
-  return (
-    <span className="inline-flex items-center gap-1.5">
-      <span className="text-xs text-muted">{prompt}</span>
-      <Button type="submit" variant="danger" size="sm">
-        {confirmLabel}
-      </Button>
-      <Button type="button" variant="ghost" size="sm" onClick={() => setAsking(false)}>
-        Cancel
-      </Button>
-    </span>
+
+      <Dialog
+        open={asking}
+        onClose={() => setAsking(false)}
+        title={modalTitle}
+        className="w-[min(440px,calc(100vw-2rem))]"
+      >
+        <div className="space-y-5">
+          <p className="text-sm text-muted leading-relaxed">{prompt}</p>
+
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-line-soft">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={pending}
+              onClick={() => setAsking(false)}
+            >
+              Cancel
+            </Button>
+            <SubmitButton
+              variant={submitVariant}
+              size="sm"
+              pendingLabel={pendingLabel || (isDestructive ? "Deleting..." : "Please wait...")}
+            >
+              {confirmLabel}
+            </SubmitButton>
+          </div>
+        </div>
+      </Dialog>
+    </>
   );
 }

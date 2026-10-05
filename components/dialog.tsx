@@ -40,7 +40,7 @@ export function Dialog({
     >
       <div className="flex items-center justify-between border-b border-line-soft px-5 py-4">
         <h2 className="font-bold">{title}</h2>
-        <button onClick={onClose} aria-label="Close" className="rounded-lg p-1 text-muted hover:bg-line-soft hover:text-ink">
+        <button type="button" onClick={onClose} aria-label="Close" className="rounded-lg p-1 text-muted hover:bg-line-soft hover:text-ink">
           <CloseIcon className="h-4 w-4" />
         </button>
       </div>
