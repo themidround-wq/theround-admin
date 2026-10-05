@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { createFromTemplate } from "@/app/actions/newsletters";
-import { BookIcon, MailIcon, SettingsIcon, Sparkle } from "@/components/icons";
+import { BookIcon, MailIcon, SettingsIcon, Sparkle, UsersIcon } from "@/components/icons";
 import { cx } from "@/components/ui";
 import { KIND_INFO } from "@/lib/broadcast-templates";
 import type { BroadcastKind } from "@/lib/types";
@@ -12,12 +12,13 @@ const ICONS: Record<BroadcastKind, (p: { className?: string }) => React.ReactNod
   feature_update: Sparkle,
   announcement: BookIcon,
   maintenance: SettingsIcon,
+  direct: UsersIcon,
 };
 
 export function NewBroadcast() {
   const [pending, start] = useTransition();
   return (
-    <div className="grid gap-2 p-5 pt-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-2 p-5 pt-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       {(Object.keys(KIND_INFO) as BroadcastKind[]).map((kind) => {
         const Icon = ICONS[kind];
         return (

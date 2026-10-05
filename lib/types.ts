@@ -179,7 +179,7 @@ export type ActionResult = { ok: boolean; message: string } | null;
 
 // ---- newsletters ---------------------------------------------------------------
 
-export type BroadcastKind = "newsletter" | "feature_update" | "announcement" | "maintenance";
+export type BroadcastKind = "newsletter" | "feature_update" | "announcement" | "maintenance" | "direct";
 export type BroadcastStatus = "draft" | "scheduled" | "sending" | "sent" | "cancelled";
 export type Audience =
   | "users_all"
@@ -189,7 +189,8 @@ export type Audience =
   | "users_inactive"
   | "waitlist_pending"
   | "waitlist_all"
-  | "everyone";
+  | "everyone"
+  | "custom";
 
 export type BroadcastContent = {
   kind: BroadcastKind;
@@ -200,6 +201,7 @@ export type BroadcastContent = {
   ctaLabel: string | null;
   ctaUrl: string | null;
   audience: Audience;
+  customEmails?: string | null;
 };
 
 export type Broadcast = BroadcastContent & {

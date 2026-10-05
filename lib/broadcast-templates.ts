@@ -21,12 +21,17 @@ export const KIND_INFO: Record<BroadcastKind, { label: string; emailLabel: strin
     emailLabel: "Service notice",
     description: "Planned downtime or an incident. Reaches app users even if they unsubscribed from newsletters.",
   },
+  direct: {
+    label: "Direct message",
+    emailLabel: "Message",
+    description: "Send a personal note or update to one or more specific recipients.",
+  },
 };
 
 /** Starter content for each scenario. `{{name}}` becomes the reader's first name. */
 export const TEMPLATES: Record<
   BroadcastKind,
-  { subject: string; preheader: string; headline: string; bodyHtml: string; ctaLabel: string | null; ctaUrl: string | null; audience: Audience }
+  { subject: string; preheader: string; headline: string; bodyHtml: string; ctaLabel: string | null; ctaUrl: string | null; audience: Audience; customEmails?: string | null }
 > = {
   newsletter: {
     subject: "This month on The Round",
@@ -35,6 +40,7 @@ export const TEMPLATES: Record<
     audience: "users_all",
     ctaLabel: "Spin a round",
     ctaUrl: "https://theround.app",
+    customEmails: null,
     bodyHtml: `<p>Hi {{name}},</p>
 <p>Here's what's been happening, and one small habit worth trying this week.</p>
 <h2>What's new</h2>
@@ -51,6 +57,7 @@ export const TEMPLATES: Record<
     audience: "users_all",
     ctaLabel: "Try it now",
     ctaUrl: "https://theround.app",
+    customEmails: null,
     bodyHtml: `<p>Hi {{name}},</p>
 <p>You asked for it, so we built it. <strong>[Feature name]</strong> is live in The Round today.</p>
 <h2>What it does</h2>
@@ -66,6 +73,7 @@ export const TEMPLATES: Record<
     audience: "everyone",
     ctaLabel: null,
     ctaUrl: null,
+    customEmails: null,
     bodyHtml: `<p>Hi {{name}},</p>
 <p>We've got something to share.</p>
 <p>What's happening, why it matters to student midwives, and what changes for you (if anything).</p>
@@ -78,9 +86,23 @@ export const TEMPLATES: Record<
     audience: "users_all",
     ctaLabel: null,
     ctaUrl: null,
+    customEmails: null,
     bodyHtml: `<p>Hi {{name}},</p>
 <p>We're doing some planned maintenance to keep The Round fast and reliable.</p>
 <ul><li><p><strong>When:</strong> [day, date], [start]–[end] WAT</p></li><li><p><strong>What's affected:</strong> you won't be able to spin or save rounds during this window.</p></li><li><p><strong>Your data:</strong> saved rounds and recordings are safe.</p></li></ul>
 <p>Sorry for the interruption. If anything looks wrong afterwards, just reply to this email.</p>`,
+  },
+  direct: {
+    subject: "A note from The Round team",
+    preheader: "A message from our team.",
+    headline: "Hello",
+    audience: "custom",
+    ctaLabel: null,
+    ctaUrl: null,
+    customEmails: "",
+    bodyHtml: `<p>Hi {{name}},</p>
+<p>I wanted to reach out to you directly from The Round team.</p>
+<p>Write your message here.</p>
+<p>Best regards,<br />The Round Team</p>`,
   },
 };

@@ -106,6 +106,7 @@ export function ConfirmSubmit({
   variant = "danger-ghost",
   size = "sm",
   className,
+  title,
 }: {
   children: ReactNode;
   confirmLabel?: string;
@@ -113,11 +114,12 @@ export function ConfirmSubmit({
   variant?: ComponentProps<typeof Button>["variant"];
   size?: "sm" | "md";
   className?: string;
+  title?: string;
 }) {
   const [asking, setAsking] = useState(false);
   if (!asking) {
     return (
-      <Button type="button" variant={variant} size={size} className={className} onClick={() => setAsking(true)}>
+      <Button type="button" variant={variant} size={size} className={className} title={title} onClick={() => setAsking(true)}>
         {children}
       </Button>
     );

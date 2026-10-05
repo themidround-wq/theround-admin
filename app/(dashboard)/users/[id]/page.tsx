@@ -11,6 +11,7 @@ import { GOAL_LABEL, fmtDate, fmtDateTime, fmtDuration } from "@/lib/format";
 import type { UserDetail } from "@/lib/types";
 import { RoundsTable } from "../../practice/rounds-table";
 import { Avatar } from "../avatar";
+import { EmailUserButton } from "./email-user-button";
 
 export const metadata: Metadata = { title: "User" };
 
@@ -64,6 +65,7 @@ export default async function UserPage({ params }: PageProps<"/users/[id]">) {
         </div>
         {editable && (
           <div className="flex flex-wrap items-center gap-2">
+            <EmailUserButton email={user.email} name={user.name} />
             <ActionForm action={setUserSuspended}>
               <input type="hidden" name="id" value={user.id} />
               <input type="hidden" name="suspended" value={String(!user.suspendedAt)} />

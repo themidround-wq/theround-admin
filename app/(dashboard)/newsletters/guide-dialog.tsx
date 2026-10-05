@@ -66,9 +66,9 @@ export function NewsletterGuideModal({
               <CheckIcon className="h-3 w-3" />
             </div>
             <div>
-              <b className="text-ink">3. Audience with reachable recipients</b>
+              <b className="text-ink">3. Audience or Specific recipients</b>
               <p className="mt-0.5 text-xs text-muted">
-                Pick a target audience. The selected group must have at least 1 reachable contact (<code className="font-mono text-[11px]">count &gt; 0</code>). <em>Service / Maintenance notices can only target app users.</em>
+                Choose a pre-defined audience segment (All users, Students, Waitlist, etc.) or choose <b className="text-ink">Specific recipients</b> to type/paste one or multiple individual email addresses (separated by commas or spaces).
               </p>
             </div>
           </div>

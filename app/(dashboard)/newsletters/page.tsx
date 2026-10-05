@@ -5,6 +5,7 @@ import { adminFetch, canEdit, currentAdmin } from "@/lib/api";
 import { KIND_INFO } from "@/lib/broadcast-templates";
 import { fmtAgo, fmtDateTime, fmtNumber } from "@/lib/format";
 import type { AudienceOption, Broadcast, BroadcastSummary, Paged } from "@/lib/types";
+import { BroadcastRowActions } from "./broadcast-row-actions";
 import { NewsletterGuideButton } from "./guide-dialog";
 import { NewBroadcast } from "./new-broadcast";
 import { StatusBadge } from "./status-badge";
@@ -38,7 +39,7 @@ export default async function NewslettersPage({ searchParams }: PageProps<"/news
       <PageHeader
         eyebrow="Workspace"
         title="Newsletters"
-        description="Write and send newsletters, feature updates, announcements and service notices to app users and the waitlist."
+        description="Write and send newsletters, feature updates, announcements, service notices, and direct messages to app users and waitlist."
         actions={
           <div className="flex items-center gap-2">
             <NewsletterGuideButton />
@@ -80,6 +81,7 @@ export default async function NewslettersPage({ searchParams }: PageProps<"/news
                 <th className={th}>Status</th>
                 <th className={`${th} text-right`}>Delivered</th>
                 <th className={th}>When</th>
+                <th className={`${th} text-right`}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -94,7 +96,9 @@ export default async function NewslettersPage({ searchParams }: PageProps<"/news
                   <td className={td}>
                     <Badge tone={b.kind === "maintenance" ? "warn" : "neutral"}>{KIND_INFO[b.kind].label}</Badge>
                   </td>
-                  <td className={`${td} whitespace-nowrap`}>{audienceLabel.get(b.audience) ?? b.audience}</td>
+                  <td className={`${td} whitespace-nowrap`}>
+                    {b.audience === "custom" ? "Specific recipients" : (audienceLabel.get(b.audience) ?? b.audience)}
+                  </td>
                   <td className={td}>
                     <StatusBadge status={b.status} />
                   </td>
@@ -110,6 +114,9 @@ export default async function NewslettersPage({ searchParams }: PageProps<"/news
                   </td>
                   <td className={`${td} whitespace-nowrap text-muted`}>
                     {b.status === "scheduled" ? `for ${fmtDateTime(b.scheduledAt)}` : b.sentAt ? fmtDateTime(b.sentAt) : `edited ${fmtAgo(b.updatedAt)}`}
+                  </td>
+                  <td className={`${td} text-right`}>
+                    <BroadcastRowActions broadcast={b} editable={editable} />
                   </td>
                 </tr>
               ))}

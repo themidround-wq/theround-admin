@@ -46,6 +46,7 @@ export function BroadcastEditor({
     ctaLabel: broadcast.ctaLabel,
     ctaUrl: broadcast.ctaUrl,
     audience: broadcast.audience,
+    customEmails: broadcast.customEmails ?? "",
   });
   const [saveState, setSaveState] = useState<SaveState>("saved");
   const [preview, setPreview] = useState<{ html: string; subject: string } | null>(null);
@@ -116,17 +117,32 @@ export function BroadcastEditor({
     return () => clearTimeout(t);
   }, [c]);
 
+  const parsedEmails = (c.customEmails ?? "")
+    .split(/[\s,;]+/)
+    .map((s) => s.trim().toLowerCase())
+    .filter((s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s));
+  const customCount = parsedEmails.length;
+
   const list = c.kind === "maintenance" ? audiences.maintenance : audiences.standard;
-  const allowed = list.filter((a) => c.kind !== "maintenance" || a.users);
-  const audience = list.find((a) => a.key === c.audience);
+  const customAudienceOption: AudienceOption = {
+    key: "custom",
+    label: "Specific recipients",
+    description: "Send to one or more individual email addresses.",
+    users: false,
+    count: customCount,
+    suppressed: 0,
+  };
+  const allowed = [...list.filter((a) => c.kind !== "maintenance" || a.users), customAudienceOption];
+  const audience = c.audience === "custom" ? customAudienceOption : list.find((a) => a.key === c.audience);
 
   const problems = [
     !c.subject.trim() && "Add a subject.",
     !c.bodyHtml.replace(/<[^>]+>/g, "").trim() && "Write the message.",
     !!c.ctaLabel?.trim() !== !!c.ctaUrl?.trim() && "Give the button both a label and a link, or neither.",
     c.ctaUrl?.trim() && !/^https:\/\//.test(c.ctaUrl.trim()) && "The button link must start with https://.",
-    c.kind === "maintenance" && !audience?.users && "Service notices can only go to app users.",
-    audience && audience.count === 0 && "Nobody is in this audience yet.",
+    c.kind === "maintenance" && c.audience !== "custom" && !audience?.users && "Service notices can only go to app users.",
+    c.audience === "custom" && customCount === 0 && "Enter at least one valid recipient email address.",
+    c.audience !== "custom" && audience && audience.count === 0 && "Nobody is in this audience yet.",
   ].filter(Boolean) as string[];
 
   const scheduled = broadcast.status === "scheduled";
@@ -192,7 +208,11 @@ export function BroadcastEditor({
                   onChange={(e) => {
                     const kind = e.target.value as BroadcastKind;
                     const users = audiences.standard.find((a) => a.key === c.audience)?.users;
-                    update({ kind, ...(kind === "maintenance" && !users ? { audience: "users_all" } : {}) });
+                    update({
+                      kind,
+                      ...(kind === "direct" && c.audience !== "custom" ? { audience: "custom" } : {}),
+                      ...(kind === "maintenance" && !users && c.audience !== "custom" ? { audience: "users_all" } : {}),
+                    });
                   }}
                   className={cx(inputClass, "mt-1")}
                 >
@@ -213,19 +233,45 @@ export function BroadcastEditor({
                 >
                   {allowed.map((a) => (
                     <option key={a.key} value={a.key}>
-                      {a.label} · {fmtNumber(a.count)}
+                      {a.label} · {a.key === "custom" ? `${fmtNumber(customCount)} address${customCount === 1 ? "" : "es"}` : fmtNumber(a.count)}
                     </option>
                   ))}
                 </select>
               </label>
             </div>
+
+            {c.audience === "custom" && (
+              <div>
+                <label className={label}>
+                  Recipient email address{customCount > 1 ? "es" : ""}{" "}
+                  <span className="font-normal">
+                    ({customCount ? `${customCount} valid recipient${customCount === 1 ? "" : "s"}` : "separate with commas, spaces, or new lines"})
+                  </span>
+                  <textarea
+                    rows={2}
+                    value={c.customEmails ?? ""}
+                    disabled={!editable}
+                    onChange={(e) => update({ customEmails: e.target.value })}
+                    placeholder="e.g. sarah@example.com, john@hospital.nhs.uk"
+                    className={cx(inputClass, "mt-1 font-mono text-xs")}
+                  />
+                </label>
+              </div>
+            )}
+
             <p className="-mt-1 text-xs text-muted">
-              {audience?.description}{" "}
-              {c.kind === "maintenance"
-                ? "Service notices also reach people who unsubscribed from newsletters."
-                : audience && audience.suppressed > 0
-                  ? `${fmtNumber(audience.suppressed)} unsubscribed ${audience.suppressed === 1 ? "person is" : "people are"} left out.`
-                  : ""}
+              {c.audience === "custom"
+                ? "Direct message: will be sent specifically to the addresses entered above."
+                : (
+                  <>
+                    {audience?.description}{" "}
+                    {c.kind === "maintenance"
+                      ? "Service notices also reach people who unsubscribed from newsletters."
+                      : audience && audience.suppressed > 0
+                        ? `${fmtNumber(audience.suppressed)} unsubscribed ${audience.suppressed === 1 ? "person is" : "people are"} left out.`
+                        : ""}
+                  </>
+                )}
             </p>
 
             <label className={label}>

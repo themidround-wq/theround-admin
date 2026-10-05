@@ -20,6 +20,22 @@ export async function createFromTemplate(kind: BroadcastKind) {
   redirect(`/newsletters/${b.id}`);
 }
 
+/** Creates a direct message draft targeted at a specific recipient email. */
+export async function createDirectBroadcast(email: string, name?: string | null) {
+  const t = TEMPLATES.direct;
+  const firstName = name?.trim().split(/\s+/)[0];
+  const b = await adminFetch<Broadcast>("/broadcasts", {
+    method: "POST",
+    body: {
+      kind: "direct",
+      ...t,
+      customEmails: email,
+      headline: firstName ? `Hello ${firstName}` : "Hello",
+    },
+  });
+  redirect(`/newsletters/${b.id}`);
+}
+
 /** Autosave from the editor. */
 export async function saveBroadcast(id: string, content: Partial<BroadcastContent>) {
   try {
