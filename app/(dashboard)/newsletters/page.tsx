@@ -5,6 +5,7 @@ import { adminFetch, canEdit, currentAdmin } from "@/lib/api";
 import { KIND_INFO } from "@/lib/broadcast-templates";
 import { fmtAgo, fmtDateTime, fmtNumber } from "@/lib/format";
 import type { AudienceOption, Broadcast, BroadcastSummary, Paged } from "@/lib/types";
+import { NewsletterGuideButton } from "./guide-dialog";
 import { NewBroadcast } from "./new-broadcast";
 import { StatusBadge } from "./status-badge";
 
@@ -39,9 +40,12 @@ export default async function NewslettersPage({ searchParams }: PageProps<"/news
         title="Newsletters"
         description="Write and send newsletters, feature updates, announcements and service notices to app users and the waitlist."
         actions={
-          <Link href="/newsletters/unsubscribes" className={buttonClass("secondary")}>
-            Unsubscribes · {fmtNumber(summary.unsubscribed)}
-          </Link>
+          <div className="flex items-center gap-2">
+            <NewsletterGuideButton />
+            <Link href="/newsletters/unsubscribes" className={buttonClass("secondary")}>
+              Unsubscribes · {fmtNumber(summary.unsubscribed)}
+            </Link>
+          </div>
         }
       />
       {sp.deleted && <p className="mb-3 rounded-xl border border-line bg-card px-4 py-3 text-sm">Draft deleted.</p>}

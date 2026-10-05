@@ -26,7 +26,7 @@ export const KIND_INFO: Record<BroadcastKind, { label: string; emailLabel: strin
 /** Starter content for each scenario. `{{name}}` becomes the reader's first name. */
 export const TEMPLATES: Record<
   BroadcastKind,
-  { subject: string; preheader: string; headline: string; bodyHtml: string; ctaLabel: string | null; audience: Audience }
+  { subject: string; preheader: string; headline: string; bodyHtml: string; ctaLabel: string | null; ctaUrl: string | null; audience: Audience }
 > = {
   newsletter: {
     subject: "This month on The Round",
@@ -34,6 +34,7 @@ export const TEMPLATES: Record<
     headline: "This month on The Round",
     audience: "users_all",
     ctaLabel: "Spin a round",
+    ctaUrl: "https://theround.app",
     bodyHtml: `<p>Hi {{name}},</p>
 <p>Here's what's been happening, and one small habit worth trying this week.</p>
 <h2>What's new</h2>
@@ -49,6 +50,7 @@ export const TEMPLATES: Record<
     headline: "Say hello to [feature name]",
     audience: "users_all",
     ctaLabel: "Try it now",
+    ctaUrl: "https://theround.app",
     bodyHtml: `<p>Hi {{name}},</p>
 <p>You asked for it, so we built it. <strong>[Feature name]</strong> is live in The Round today.</p>
 <h2>What it does</h2>
@@ -63,6 +65,7 @@ export const TEMPLATES: Record<
     headline: "Big news",
     audience: "everyone",
     ctaLabel: null,
+    ctaUrl: null,
     bodyHtml: `<p>Hi {{name}},</p>
 <p>We've got something to share.</p>
 <p>What's happening, why it matters to student midwives, and what changes for you (if anything).</p>
@@ -74,6 +77,7 @@ export const TEMPLATES: Record<
     headline: "Scheduled maintenance",
     audience: "users_all",
     ctaLabel: null,
+    ctaUrl: null,
     bodyHtml: `<p>Hi {{name}},</p>
 <p>We're doing some planned maintenance to keep The Round fast and reliable.</p>
 <ul><li><p><strong>When:</strong> [day, date], [start]–[end] WAT</p></li><li><p><strong>What's affected:</strong> you won't be able to spin or save rounds during this window.</p></li><li><p><strong>Your data:</strong> saved rounds and recordings are safe.</p></li></ul>

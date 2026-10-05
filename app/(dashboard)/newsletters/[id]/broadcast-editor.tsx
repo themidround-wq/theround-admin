@@ -11,13 +11,14 @@ import {
 } from "@/app/actions/newsletters";
 import { ActionForm, ConfirmSubmit, useToast } from "@/components/action-form";
 import { Dialog } from "@/components/dialog";
-import { ClockIcon, MailIcon } from "@/components/icons";
+import { ClockIcon, InfoIcon, MailIcon } from "@/components/icons";
 import { RichTextEditor } from "@/components/rich-text-editor";
 import { SubmitButton } from "@/components/submit-button";
 import { Badge, Button, Card, cx, inputClass } from "@/components/ui";
 import { KIND_INFO } from "@/lib/broadcast-templates";
 import { fmtDateTime, fmtNumber } from "@/lib/format";
 import type { AudienceOption, Broadcast, BroadcastContent, BroadcastKind } from "@/lib/types";
+import { NewsletterGuideModal } from "../guide-dialog";
 import { StatusBadge } from "../status-badge";
 
 type SaveState = "saved" | "unsaved" | "saving" | "error";
@@ -49,7 +50,7 @@ export function BroadcastEditor({
   const [saveState, setSaveState] = useState<SaveState>("saved");
   const [preview, setPreview] = useState<{ html: string; subject: string } | null>(null);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
-  const [dialog, setDialog] = useState<"test" | "schedule" | "send" | null>(null);
+  const [dialog, setDialog] = useState<"test" | "schedule" | "send" | "guide" | null>(null);
   const toast = useToast();
 
   const latest = useRef(c);
@@ -144,6 +145,9 @@ export function BroadcastEditor({
         </div>
         {editable && (
           <div className="flex flex-wrap items-center gap-2">
+            <Button variant="secondary" onClick={() => setDialog("guide")}>
+              <InfoIcon className="h-4 w-4" /> Guide
+            </Button>
             <Button variant="secondary" onClick={() => setDialog("test")}>
               <MailIcon className="h-4 w-4" /> Send test
             </Button>
@@ -285,8 +289,17 @@ export function BroadcastEditor({
           </Card>
 
           {editable && problems.length > 0 && (
-            <div className="rounded-xl border border-line bg-card px-4 py-3 text-xs text-muted">
-              <b className="text-ink">Before sending:</b> {problems.join(" ")}
+            <div className="flex flex-col gap-2 rounded-xl border border-line bg-card p-4 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <b className="text-ink">Before sending:</b> {problems.join(" ")}
+              </div>
+              <button
+                type="button"
+                onClick={() => setDialog("guide")}
+                className="inline-flex shrink-0 items-center gap-1 font-bold text-ink underline hover:text-ink/80"
+              >
+                <InfoIcon className="h-3.5 w-3.5" /> What is needed?
+              </button>
             </div>
           )}
 
@@ -347,6 +360,7 @@ export function BroadcastEditor({
         flush={flush}
       />
       <SendDialog open={dialog === "send"} onClose={() => setDialog(null)} id={broadcast.id} audience={audience} kind={c.kind} flush={flush} />
+      <NewsletterGuideModal open={dialog === "guide"} onClose={() => setDialog(null)} />
     </>
   );
 }

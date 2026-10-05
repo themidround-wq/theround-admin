@@ -219,3 +219,6 @@ export const MenuIcon = (p: P) => (
 export const EyeOffIcon = (p: P) => (
   <Stroke {...p}><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c5 0 9 4.5 10 7a13 13 0 0 1-3 4.2M6.6 6.6A13 13 0 0 0 2 12c1 2.5 5 7 10 7a9.6 9.6 0 0 0 4.4-1" /><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" /></Stroke>
 );
+export const InfoIcon = (p: P) => (
+  <Stroke {...p}><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></Stroke>
+);

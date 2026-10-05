@@ -16,7 +16,7 @@ const fail = (e: unknown): { ok: false; message: string } => {
 /** Starts a draft from a scenario template and opens the editor. */
 export async function createFromTemplate(kind: BroadcastKind) {
   const t = TEMPLATES[kind];
-  const b = await adminFetch<Broadcast>("/broadcasts", { method: "POST", body: { kind, ...t, ctaUrl: null } });
+  const b = await adminFetch<Broadcast>("/broadcasts", { method: "POST", body: { kind, ...t } });
   redirect(`/newsletters/${b.id}`);
 }
 
