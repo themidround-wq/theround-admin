@@ -1,8 +1,9 @@
+import Link from "next/link";
 import { broadcastAction } from "@/app/actions/newsletters";
 import { ActionForm, ConfirmSubmit } from "@/components/action-form";
 import { SearchForm } from "@/components/search-form";
 import { SubmitButton } from "@/components/submit-button";
-import { Badge, Card, CardHeader, Empty, Pagination, Segmented, Stat, Table, td, th, withParams } from "@/components/ui";
+import { Badge, Card, CardHeader, Empty, Pagination, Segmented, Stat, Table, buttonClass, td, th, withParams } from "@/components/ui";
 import { KIND_INFO } from "@/lib/broadcast-templates";
 import { fmtDateTime, fmtNumber, pct } from "@/lib/format";
 import type { Broadcast, BroadcastRecipient, Paged } from "@/lib/types";
@@ -49,6 +50,12 @@ export function BroadcastReport({
         </div>
         {editable && (
           <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={`/email-replies?broadcastId=${b.id}`}
+              className={buttonClass("secondary")}
+            >
+              View replies
+            </Link>
             {sending && (
               <OpForm id={b.id} op="cancel">
                 <ConfirmSubmit size="md" variant="danger-ghost" prompt="Stop sending?" confirmLabel="Stop">

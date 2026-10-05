@@ -5,7 +5,7 @@ import { deleteUser, resetUserTwoFactor, setUserSuspended } from "@/app/actions/
 import { ActionForm, ConfirmSubmit } from "@/components/action-form";
 import { ChevronIcon } from "@/components/icons";
 import { SubmitButton } from "@/components/submit-button";
-import { Badge, Card, CardHeader, Stat } from "@/components/ui";
+import { Badge, Card, CardHeader, Stat, buttonClass } from "@/components/ui";
 import { ApiError, adminFetch, canEdit, currentAdmin } from "@/lib/api";
 import { GOAL_LABEL, fmtDate, fmtDateTime, fmtDuration } from "@/lib/format";
 import type { UserDetail } from "@/lib/types";
@@ -65,6 +65,9 @@ export default async function UserPage({ params }: PageProps<"/users/[id]">) {
         </div>
         {editable && (
           <div className="flex flex-wrap items-center gap-2">
+            <Link href={`/email-replies?userId=${user.id}`} className={buttonClass("secondary")}>
+              Replies
+            </Link>
             <EmailUserButton email={user.email} name={user.name} />
             <ActionForm action={setUserSuspended}>
               <input type="hidden" name="id" value={user.id} />

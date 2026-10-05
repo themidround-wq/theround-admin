@@ -20,6 +20,7 @@ import {
   TicketIcon,
   UsersIcon,
   WaveformIcon,
+  InboxIcon,
 } from "./icons";
 import { cx } from "./ui";
 
@@ -32,6 +33,7 @@ const NAV = [
       { href: "/users", label: "Users", icon: UsersIcon },
       { href: "/practice", label: "Practice", icon: WaveformIcon },
       { href: "/newsletters", label: "Newsletters", icon: MailIcon },
+      { href: "/email-replies", label: "Email replies", icon: InboxIcon },
       { href: "/content", label: "Clinical content", icon: BookIcon },
     ],
   },

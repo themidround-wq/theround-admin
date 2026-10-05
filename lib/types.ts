@@ -248,3 +248,54 @@ export type BroadcastSummary = {
 };
 
 export type Unsubscribe = { email: string; source: string; createdAt: string };
+
+// ---- email replies -------------------------------------------------------------
+
+export type EmailReplyStatus = "unread" | "read" | "archived";
+
+export type EmailReplyMessage = {
+  id: string;
+  replyId: string;
+  senderType: "admin" | "user";
+  senderEmail: string;
+  senderName: string | null;
+  bodyText: string;
+  bodyHtml: string | null;
+  resendMessageId?: string | null;
+  createdAt: string;
+};
+
+export type EmailReply = {
+  id: string;
+  resendEmailId: string | null;
+  messageId: string | null;
+  inReplyTo: string | null;
+  references: string | null;
+  fromEmail: string;
+  fromName: string | null;
+  toEmail: string;
+  subject: string;
+  bodyText: string;
+  bodyHtml: string | null;
+  snippet: string;
+  status: EmailReplyStatus;
+  userId: string | null;
+  broadcastId: string | null;
+  replyCount: number;
+  lastRepliedAt: string | null;
+  headers: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user?: { id: string; email: string; name: string | null; pictureUrl?: string | null } | null;
+  broadcast?: { id: string; subject: string; kind: BroadcastKind } | null;
+  messages?: EmailReplyMessage[];
+};
+
+export type EmailReplySummary = {
+  total: number;
+  unread: number;
+  read: number;
+  archived: number;
+  replied: number;
+};
+
