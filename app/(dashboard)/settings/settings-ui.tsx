@@ -27,7 +27,7 @@ export function SettingRow({ setting: s, editable }: { setting: Setting; editabl
           <Toggle on={s.value === true} disabled={!editable} label={s.label} />
         </ActionForm>
       ) : (
-        <ActionForm action={updateSetting} className="flex shrink-0 rounded-lg border border-line p-0.5">
+        <ActionForm action={updateSetting} className="flex shrink-0 flex-wrap justify-end rounded-lg border border-line p-0.5">
           <input type="hidden" name="key" value={s.key} />
           {s.options?.map((o) => (
             <button
@@ -40,7 +40,7 @@ export function SettingRow({ setting: s, editable }: { setting: Setting; editabl
                 s.value === o ? "bg-ink text-cream" : "text-muted hover:text-ink disabled:hover:text-muted",
               )}
             >
-              {o === 240 ? "4:00 Case" : "1:30 Quick"}
+              {s.optionLabels?.[String(o)] ?? (o === 240 ? "4:00 Case" : o === 90 ? "1:30 Quick" : String(o))}
             </button>
           ))}
         </ActionForm>

@@ -103,6 +103,20 @@ export async function deleteRound(_: ActionResult, f: FormData) {
   });
 }
 
+export async function flagRound(_: ActionResult, f: FormData) {
+  return run(async () => {
+    await adminFetch(`/rounds/${s(f, "id")}/flag`, { method: "POST", body: { note: s(f, "note") || undefined } });
+    return "Flagged for review.";
+  });
+}
+
+export async function unflagRound(_: ActionResult, f: FormData) {
+  return run(async () => {
+    await adminFetch(`/rounds/${s(f, "id")}/flag`, { method: "DELETE" });
+    return "Flag cleared.";
+  });
+}
+
 /** Called from the play button; returns a short-lived signed URL. */
 export async function roundAudioUrl(id: string): Promise<{ url?: string; error?: string }> {
   try {
@@ -124,12 +138,36 @@ export async function createCategory(_: ActionResult, f: FormData) {
 }
 
 export async function updateCategory(_: ActionResult, f: FormData) {
-  const body: { name?: string; active?: boolean } = {};
+  const body: { name?: string; active?: boolean; slug?: string } = {};
   if (f.has("name")) body.name = s(f, "name");
   if (f.has("active")) body.active = s(f, "active") === "true";
+  if (f.has("slug")) body.slug = s(f, "slug").toLowerCase();
   return run(async () => {
     await adminFetch(`/catalog/categories/${s(f, "id")}`, { method: "PATCH", body });
+    if (body.slug !== undefined) return "App key saved.";
     return body.active === undefined ? "Category renamed." : body.active ? "Category is back on the wheel." : "Category hidden from the wheel.";
+  });
+}
+
+/** One item per line → array, empties dropped. */
+const lines = (v: string) =>
+  v
+    .split(/\r?\n/)
+    .map((x) => x.replace(/^\s*[-•\d.)]+\s*/, "").trim())
+    .filter(Boolean);
+
+/** Saves the marking rubric for a question (all fields empty → rubric removed). */
+export async function updateRubric(_: ActionResult, f: FormData) {
+  const examinerPoints = lines(s(f, "examinerPoints"));
+  const keyFacts = lines(s(f, "keyFacts"));
+  const modelAnswer = s(f, "modelAnswer").trim();
+  const empty = !examinerPoints.length && !keyFacts.length && !modelAnswer;
+  return run(async () => {
+    await adminFetch(`/catalog/questions/${s(f, "id")}`, {
+      method: "PATCH",
+      body: { rubric: empty ? null : { examinerPoints, keyFacts, modelAnswer: modelAnswer || null } },
+    });
+    return empty ? "Rubric removed." : "Rubric saved. New answers are marked against it.";
   });
 }
 
@@ -209,7 +247,7 @@ export async function deleteQuestion(_: ActionResult, f: FormData) {
 export async function updateSetting(_: ActionResult, f: FormData) {
   const key = s(f, "key");
   const raw = s(f, "value");
-  const value = raw === "true" ? true : raw === "false" ? false : Number(raw);
+  const value = raw === "true" ? true : raw === "false" ? false : /^-?\d+(\.\d+)?$/.test(raw) ? Number(raw) : raw;
   return run(async () => {
     await adminFetch("/settings", { method: "PATCH", body: { values: { [key]: value } } });
     return "Saved. Live on the API within 30 seconds.";

@@ -24,6 +24,13 @@ const STATUSES = [
   { value: "spun", label: "Spun only" },
 ];
 
+const MARKING = [
+  { value: "", label: "Any feedback" },
+  { value: "ai", label: "AI marked" },
+  { value: "placeholder", label: "Placeholder" },
+  { value: "flagged", label: "Flagged" },
+];
+
 export default async function PracticePage({ searchParams }: PageProps<"/practice">) {
   const sp = await searchParams;
   const days = ["7", "14", "30", "90"].includes(String(sp.days)) ? Number(sp.days) : 30;
@@ -31,11 +38,21 @@ export default async function PracticePage({ searchParams }: PageProps<"/practic
   const limit = 25;
   const status = str(sp.status) ?? "";
   const categoryId = str(sp.categoryId) ?? "";
+  const marking = str(sp.marking) ?? "";
 
   const [activity, rounds, catalog, admin] = await Promise.all([
     adminFetch<Activity>("/activity", { query: { days } }),
     adminFetch<Paged<Round>>("/rounds", {
-      query: { page, limit, status, categoryId, userId: str(sp.userId), search: str(sp.search) },
+      query: {
+        page,
+        limit,
+        status,
+        categoryId,
+        userId: str(sp.userId),
+        search: str(sp.search),
+        source: marking === "ai" || marking === "placeholder" ? marking : undefined,
+        flagged: marking === "flagged" ? "true" : undefined,
+      },
     }),
     adminFetch<CatalogCategory[]>("/catalog"),
     currentAdmin(),
@@ -133,6 +150,7 @@ export default async function PracticePage({ searchParams }: PageProps<"/practic
         <div className="flex flex-col gap-3 border-b border-line-soft p-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex flex-wrap gap-2">
             <Segmented options={STATUSES} value={status} hrefFor={(v) => withParams("/practice", sp, { status: v, page: undefined })} />
+            <Segmented options={MARKING} value={marking} hrefFor={(v) => withParams("/practice", sp, { marking: v, page: undefined })} />
             <CategoryFilter options={categoryOptions} value={categoryId} sp={sp} />
           </div>
           <SearchForm action="/practice" params={sp} placeholder="Search email, topic or question" />

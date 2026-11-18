@@ -84,6 +84,58 @@ export type Round = {
   completedAt: string | null;
   savedAt: string | null;
   user: { id: string; email: string; name: string | null };
+  // Practice sessions + marking (absent on older API versions)
+  session?: { id: string; title: string } | null;
+  retake?: boolean;
+  score?: number | null;
+  feedback?: Feedback | null;
+  feedbackSource?: "ai" | "placeholder" | null;
+  transcript?: string | null;
+  markingMeta?: MarkingMeta | null;
+  flaggedAt?: string | null;
+  flagNote?: string | null;
+};
+
+export type Feedback = {
+  score: number;
+  verdict: string;
+  summary: string;
+  metrics: { label: string; score: number }[];
+  worked: string[];
+  workOn: { point: string; trySaying: string }[];
+  examiner: { label: string; covered: boolean }[];
+};
+
+export type MarkingMeta = {
+  reason?: string | null;
+  transcription?: { provider: string; model: string };
+  marking?: { model: string; inputTokens: number; outputTokens: number; cacheReadTokens: number };
+  metrics?: { words: number; wordsPerMinute: number; fillers: number; longPauses: number; timed: boolean };
+  rubric?: boolean;
+  costUsd?: number;
+  ms?: number;
+};
+
+export type Rubric = { examinerPoints: string[]; keyFacts: string[]; modelAnswer: string | null };
+
+export type AiStatus = {
+  enabled: boolean;
+  transcription: { provider: string; missing: string | null };
+  marking: { model: string; openModelName: string | null; missing: string | null };
+  usage: {
+    today: { aiMarked: number; costUsd: number };
+    last30Days: {
+      aiMarked: number;
+      placeholder: number;
+      fallbacks: number;
+      lastFallbackReason: string | null;
+      costUsd: number;
+      averageScore: number | null;
+      flagged: number;
+      byModel: Record<string, number>;
+      byTranscriber: Record<string, number>;
+    };
+  };
 };
 
 export type UserDetail = {
@@ -129,6 +181,7 @@ export type Activity = {
 export type CatalogCategory = {
   id: string;
   name: string;
+  slug?: string | null;
   sortOrder: number;
   active: boolean;
   playable: boolean;
@@ -137,18 +190,19 @@ export type CatalogCategory = {
     id: string;
     name: string;
     rounds: number;
-    questions: { id: string; text: string; rounds: number }[];
+    questions: { id: string; text: string; rounds: number; rubric?: Rubric | null }[];
   }[];
 };
 
 export type Setting = {
   key: string;
-  type: "boolean" | "number";
-  options?: number[];
-  default: boolean | number;
+  type: "boolean" | "number" | "string";
+  options?: (number | string)[];
+  optionLabels?: Record<string, string>;
+  default: boolean | number | string;
   label: string;
   description: string;
-  value: boolean | number;
+  value: boolean | number | string;
   updatedAt: string | null;
   updatedBy: string | null;
 };

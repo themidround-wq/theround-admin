@@ -11,13 +11,14 @@ import {
   moveCategory,
   updateCategory,
   updateQuestion,
+  updateRubric,
   updateTopic,
 } from "@/app/actions/admin";
 import { ActionForm, ConfirmSubmit } from "@/components/action-form";
 import { ArrowDownIcon, ArrowUpIcon, ChevronIcon, EyeOffIcon, PlusIcon, TrashIcon } from "@/components/icons";
 import { SubmitButton } from "@/components/submit-button";
 import { Badge, Button, Card, cx, inputClass } from "@/components/ui";
-import type { CatalogCategory } from "@/lib/types";
+import type { CatalogCategory, Rubric } from "@/lib/types";
 
 type Action = Parameters<typeof ActionForm>[0]["action"];
 
@@ -46,6 +47,7 @@ export function CatalogEditor({ catalog, editable }: { catalog: CatalogCategory[
             </button>
             <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
               {!c.active ? <Badge>Hidden</Badge> : !c.playable ? <Badge tone="warn">Needs a question</Badge> : <Badge tone="green">On the wheel</Badge>}
+              {c.slug ? <code className="rounded bg-line-soft px-1.5 py-0.5 text-[11px] text-slate">{c.slug}</code> : <Badge tone="neutral">No app key</Badge>}
               <span className="num">
                 {c.topics.length} topics · {c.rounds} saved rounds
               </span>
@@ -57,6 +59,7 @@ export function CatalogEditor({ catalog, editable }: { catalog: CatalogCategory[
               {editable && (
                 <div className="mb-4 flex flex-wrap items-center gap-2">
                   <InlineEdit action={updateCategory} id={c.id} name="name" value={c.name} label="Rename category" />
+                  <InlineEdit action={updateCategory} id={c.id} name="slug" value={c.slug ?? ""} label={c.slug ? "Change app key" : "Set app key"} />
                   <ActionForm action={updateCategory}>
                     <input type="hidden" name="id" value={c.id} />
                     <input type="hidden" name="active" value={String(!c.active)} />
@@ -176,8 +179,12 @@ function MoveButton({ id, dir, disabled }: { id: string; dir: "up" | "down"; dis
   );
 }
 
-function QuestionText({ q, editable }: { q: { id: string; text: string; rounds: number }; editable: boolean }) {
+type Q = { id: string; text: string; rounds: number; rubric?: Rubric | null };
+
+function QuestionText({ q, editable }: { q: Q; editable: boolean }) {
   const [editing, setEditing] = useState(false);
+  const [rubricOpen, setRubricOpen] = useState(false);
+  if (rubricOpen) return <RubricEditor q={q} editable={editable} onClose={() => setRubricOpen(false)} />;
   if (editing) {
     return (
       <ActionForm action={updateQuestion} onSuccess={() => setEditing(false)} className="flex w-full flex-col gap-2">
@@ -198,6 +205,9 @@ function QuestionText({ q, editable }: { q: { id: string; text: string; rounds: 
     <>
       <span className="min-w-0 flex-1">{q.text}</span>
       <span className="flex shrink-0 items-center gap-1">
+        <button type="button" onClick={() => setRubricOpen(true)} className="rounded-full" title="What the AI marks against">
+          {q.rubric ? <Badge tone="green">Rubric · {q.rubric.examinerPoints.length} points</Badge> : <Badge tone="warn">No rubric</Badge>}
+        </button>
         <span className="num text-xs text-muted">{q.rounds} saved</span>
         {editable && (
           <>
@@ -251,5 +261,44 @@ function AddInline({ label, className, children }: { label: string; className?: 
     <button onClick={() => setOpen(true)} className={cx("mt-2 inline-flex items-center gap-1 text-xs font-bold text-moss hover:underline", className)}>
       <PlusIcon className="h-3.5 w-3.5" /> {label}
     </button>
+  );
+}
+
+/** Examiner points, key facts and an optional model answer: what AI marking scores against. */
+function RubricEditor({ q, editable, onClose }: { q: Q; editable: boolean; onClose: () => void }) {
+  const r = q.rubric;
+  const area = "w-full rounded-lg border border-line bg-card p-2 text-[13px] outline-none focus:border-moss disabled:bg-canvas";
+  return (
+    <ActionForm action={updateRubric} onSuccess={onClose} className="flex w-full flex-col gap-3">
+      <input type="hidden" name="id" value={q.id} />
+      <div>
+        <p className="font-bold">{q.text}</p>
+        <p className="mt-0.5 text-xs text-muted">
+          AI marking scores answers against this. Without a rubric the model uses its own judgement, so add one for every question students practise.
+        </p>
+      </div>
+      <label className="grid gap-1">
+        <span className="text-xs font-bold">Examiner points · one per line, in the order you&apos;d expect them (3–6)</span>
+        <textarea name="examinerPoints" rows={4} defaultValue={r?.examinerPoints.join("\n") ?? ""} disabled={!editable} placeholder={"Call for help early\nABCDE and haemodynamic status\nCause-based management (the 4 Ts)\nEscalation and documentation"} className={area} />
+      </label>
+      <label className="grid gap-1">
+        <span className="text-xs font-bold">Key facts · doses, thresholds, sequences a correct answer must get right</span>
+        <textarea name="keyFacts" rows={3} defaultValue={r?.keyFacts.join("\n") ?? ""} disabled={!editable} placeholder={"Blood loss ≥ 500 ml after vaginal birth\nOxytocin 10 units IM"} className={area} />
+      </label>
+      <label className="grid gap-1">
+        <span className="text-xs font-bold">Model answer · optional, for the marker&apos;s reference</span>
+        <textarea name="modelAnswer" rows={4} maxLength={4000} defaultValue={r?.modelAnswer ?? ""} disabled={!editable} className={area} />
+      </label>
+      <div className="flex justify-end gap-2">
+        <Button type="button" size="sm" variant="ghost" onClick={onClose}>
+          {editable ? "Cancel" : "Close"}
+        </Button>
+        {editable && (
+          <SubmitButton size="sm" variant="primary" pendingLabel="Saving…">
+            Save rubric
+          </SubmitButton>
+        )}
+      </div>
+    </ActionForm>
   );
 }
